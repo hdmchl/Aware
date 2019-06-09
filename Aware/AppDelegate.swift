@@ -15,6 +15,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Redraw button every minute
     let buttonRefreshRate: TimeInterval = 60
 
+    // Notify every 90mins
+    let defaultUserNotificationSeconds: TimeInterval = 60 * 90
+    let breakNotification = NSUserNotification()
+    
     // Reference to installed global mouse event monitor
     var mouseEventMonitor: Any?
 
@@ -49,6 +53,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let notificationCenter = NSWorkspace.shared.notificationCenter
         notificationCenter.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: nil) { _ in self.resetTimer() }
         notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: nil) { _ in self.resetTimer() }
+        
+        //setup the break notification
+        breakNotification.title = "It's time for a break"
+        breakNotification.soundName = NSUserNotificationDefaultSoundName
     }
 
     func resetTimer() {
@@ -93,6 +101,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     NSEvent.EventTypeMask.leftMouseDown
                 ], handler: onMouseEvent)
             }
+        } else if (Int(duration) > 0 && Int(duration) % Int(defaultUserNotificationSeconds) == 0) {
+            breakNotification.informativeText = "[" + title + "] Go for a walk and stare into the distance."
+            NSUserNotificationCenter.default.deliver(breakNotification)
         }
     }
 
